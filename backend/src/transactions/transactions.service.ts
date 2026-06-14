@@ -6,7 +6,7 @@ import { IAccountService } from '../accounts/interfaces/account.service.interfac
 import { IUserService } from '../users/interfaces/user.service.interface';
 import { TransferDto } from './dto/transfer.dto';
 import { FilterTransactionsDto } from './dto/filter-transactions.dto';
-import { Transaction } from './transaction.entity';
+import { TransactionResponseDto } from './dto/transaction-response.dto';
 
 @Injectable()
 export class TransactionsService implements ITransactionService {
@@ -58,7 +58,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  getTransactions(accountId: string, filters: FilterTransactionsDto): Promise<Transaction[]> {
+  getTransactions(accountId: string, filters: FilterTransactionsDto): Promise<TransactionResponseDto[]> {
     return this.transactionRepository.findByAccountId(accountId, filters);
   }
 }

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { Between, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
 import { ITransactionRepository } from './interfaces/transaction.repository.interface';
 import { FilterTransactionsDto, TransactionType } from './dto/filter-transactions.dto';
+import { TransactionResponseDto } from './dto/transaction-response.dto';
 
 @Injectable()
 export class TransactionRepository implements ITransactionRepository {
@@ -23,24 +24,47 @@ export class TransactionRepository implements ITransactionRepository {
     return repo.save(transaction);
   }
 
-  findByAccountId(accountId: string, filters: FilterTransactionsDto): Promise<Transaction[]> {
-    const query = this.orm.createQueryBuilder('transaction');
-
-    query.where(
-      '(transaction.debitedAccountId = :id OR transaction.creditedAccountId = :id)',
-      { id: accountId },
-    );
+  async findByAccountId(accountId: string, filters: FilterTransactionsDto): Promise<TransactionResponseDto[]> {
+    let where: FindOptionsWhere<Transaction> | FindOptionsWhere<Transaction>[]
 
     if (filters.type === TransactionType.CASH_OUT) {
-      query.andWhere('transaction.debitedAccountId = :id', { id: accountId });
+      where = { debitedAccountId: accountId }
     } else if (filters.type === TransactionType.CASH_IN) {
-      query.andWhere('transaction.creditedAccountId = :id', { id: accountId });
+      where = { creditedAccountId: accountId }
+    } else {
+      where = [
+        { debitedAccountId: accountId },
+        { creditedAccountId: accountId },
+      ]
     }
 
     if (filters.date) {
-      query.andWhere('DATE(transaction.createdAt) = :date', { date: filters.date });
+      const start = new Date(filters.date)
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(filters.date)
+      end.setHours(23, 59, 59, 999)
+
+      const dateFilter = { createdAt: Between(start, end) }
+
+      where = Array.isArray(where)
+        ? where.map((condition) => ({ ...condition, ...dateFilter }))
+        : { ...where, ...dateFilter }
     }
 
-    return query.orderBy('transaction.createdAt', 'DESC').getMany();
+    const transactions = await this.orm.find({
+      where,
+      relations: { debitedAccount: { user: true }, creditedAccount: { user: true } },
+      order: { createdAt: 'DESC' },
+    })
+
+    return transactions.map((transaction) => ({
+      id: transaction.id,
+      debitedAccountId: transaction.debitedAccountId,
+      creditedAccountId: transaction.creditedAccountId,
+      value: transaction.value,
+      createdAt: transaction.createdAt,
+      debitedUsername: transaction.debitedAccount?.user?.username ?? '',
+      creditedUsername: transaction.creditedAccount?.user?.username ?? '',
+    }))
   }
 }
