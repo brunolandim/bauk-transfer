@@ -171,7 +171,6 @@ async function fetchTransactions(filters: { date?: string; type?: 'cash-in' | 'c
 
 async function handleTransfer() {
   const amount = parseFloat(transferAmount.value)
-  console.log(amount)
   if (!transferUsername.value.trim() || isNaN(amount) || amount <= 0) {
     toast.error('Preencha todos os campos corretamente')
     return
