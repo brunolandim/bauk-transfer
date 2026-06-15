@@ -4,7 +4,14 @@
 
     <form @submit.prevent="handleLogin" class="space-y-4">
       <BaseInput v-model="username" label="Usuário" placeholder="seunome" autocomplete="username" />
-      <BaseInput v-model="password" label="Senha" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <BaseInput v-model="password" label="Senha" :type="showPassword ? 'text' : 'password'" placeholder="••••••••" autocomplete="current-password">
+        <template #icon>
+          <button type="button" @click="showPassword = !showPassword" class="text-slate-400 hover:text-slate-600 transition cursor-pointer">
+            <EyeSlashIcon v-if="showPassword" class="w-4 h-4" />
+            <EyeIcon v-else class="w-4 h-4" />
+          </button>
+        </template>
+      </BaseInput>
       <BaseButton type="submit" label="Entrar" loading-text="Entrando..." :loading="loading" />
     </form>
 
@@ -25,10 +32,12 @@ import { login } from '../api'
 import AuthCard from '../components/AuthCard.vue'
 import BaseButton from '../components/BaseButton.vue'
 import BaseInput from '../components/BaseInput.vue'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const username = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const loading = ref(false)
 
 async function handleLogin() {
