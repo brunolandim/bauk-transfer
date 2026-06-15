@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Inject, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query, Request as Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ITransactionService } from './interfaces/transaction.service.interface';
 import { TransferDto } from './dto/transfer.dto';
@@ -13,12 +14,12 @@ export class TransactionsController {
   ) {}
 
   @Post('transfer')
-  transfer(@Request() req, @Body() dto: TransferDto) {
+  transfer(@Req() req: Request & { user: { accountId: string } }, @Body() dto: TransferDto) {
     return this.transactionsService.transfer(req.user.accountId, dto);
   }
 
   @Get()
-  getTransactions(@Request() req, @Query() filters: FilterTransactionsDto) {
+  getTransactions(@Req() req: Request & { user: { accountId: string } }, @Query() filters: FilterTransactionsDto) {
     return this.transactionsService.getTransactions(req.user.accountId, filters);
   }
 }

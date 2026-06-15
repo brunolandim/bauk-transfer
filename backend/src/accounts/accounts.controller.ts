@@ -1,4 +1,5 @@
-import { Controller, Get, Inject, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Request as Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { IAccountService } from './interfaces/account.service.interface';
 
@@ -11,7 +12,7 @@ export class AccountsController {
   ) {}
 
   @Get('balance')
-  async getBalance(@Request() req) {
+  async getBalance(@Req() req: Request & { user: { accountId: string } }) {
     const balance = await this.accountService.getBalance(req.user.accountId);
     return { balance };
   }
