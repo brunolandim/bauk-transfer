@@ -4,25 +4,25 @@ import { Account } from '../accounts/account.entity';
 @Entity('transactions')
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  debitedAccountId: string;
+  debitedAccountId!: string;
 
   @Column()
-  creditedAccountId: string;
+  creditedAccountId!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  value: number;
+  value!: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => Account, { eager: false })
   @JoinColumn({ name: 'debitedAccountId' })
-  debitedAccount: Account;
+  debitedAccount!: Account;
 
   @ManyToOne(() => Account, { eager: false })
   @JoinColumn({ name: 'creditedAccountId' })
-  creditedAccount: Account;
+  creditedAccount!: Account;
 }

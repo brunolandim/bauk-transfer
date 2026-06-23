@@ -4,18 +4,18 @@ import { Account } from '../accounts/account.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  username: string;
+  username!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @Column()
-  accountId: string;
+  accountId!: string;
 
   @OneToOne(() => Account, (account) => account.user, { eager: false })
   @JoinColumn({ name: 'accountId' })
-  account: Account;
+  account!: Account;
 }
